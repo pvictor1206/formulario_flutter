@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class CadastrarPage extends StatelessWidget {
+class FormPage extends StatelessWidget {
 
 
   final  TextEditingController _nomeControle = TextEditingController();
