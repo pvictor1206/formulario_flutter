@@ -1,13 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:formulario_flutter/database/db.dart';
 import 'package:formulario_flutter/models/form/form_model.dart';
 import 'package:formulario_flutter/modules/form/widget/text_field/text_field_widget.dart';
+import 'package:formulario_flutter/modules/info/info_page.dart';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
+import 'dart:async';
+import 'package:flutter/widgets.dart';
+import 'package:formulario_flutter/models/form/form_model.dart';
 
-class FormPage extends StatelessWidget {
 
 
-  final  TextEditingController _nomeControle = TextEditingController();
-  final  TextEditingController _cpfControle = TextEditingController();
-  final  TextEditingController _rgControle = TextEditingController();
+class FormPage extends StatefulWidget {
+  const FormPage({Key? key}) : super(key: key);
+
+  @override
+  _FormPageState createState() => _FormPageState();
+}
+
+class _FormPageState extends State<FormPage> {
+  final TextEditingController _nomeControle = TextEditingController();
+  final TextEditingController _cpfControle = TextEditingController();
+  final TextEditingController _rgControle = TextEditingController();
+
+  late DatabaseClientes handler;
+
+  @override
+  void initState() {
+    super.initState();
+    this.handler = DatabaseClientes();
+    this.handler.initializeDB().whenComplete(() async {
+      await this.addUsers();
+      setState(() {});
+    });
+  }
+
+  Future<int> addUsers() async {
+    Clientes firstUser = Clientes(nome: _nomeControle.text, cpf: int.tryParse(_cpfControle.text), rg: int.tryParse(_rgControle.text));
+    List<Clientes> listOfUsers = [firstUser];
+    return await this.handler.insertClientes(listOfUsers);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +58,8 @@ class FormPage extends StatelessWidget {
           child: SingleChildScrollView(
             child: Container(
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(const Radius.circular(25.0)),
-                  color: Colors.lightBlue,
+                borderRadius: BorderRadius.all(const Radius.circular(25.0)),
+                color: Colors.lightBlue,
               ),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -36,7 +69,8 @@ class FormPage extends StatelessWidget {
                   children: [
 
 
-                    Text("Cadastro de Cliente",style: TextStyle(fontSize: 30.0, color: Colors.white),),
+                    Text("Cadastro de Cliente",
+                      style: TextStyle(fontSize: 30.0, color: Colors.white),),
 
                     SizedBox(height: 30),
 
@@ -55,19 +89,22 @@ class FormPage extends StatelessWidget {
 
 
                     RaisedButton(
-                      onPressed: (){
+                      onPressed: () {
 
-                        final String nome = _nomeControle.text;
-                        final int? cpf = int.tryParse(_cpfControle.text);
-                        final int? rg = int.tryParse(_rgControle.text);
+                        addUsers();
 
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => InfoPage(handler: handler)
+                            )
+                        );
 
                       },
 
                       child: Text("Cadastrar"),
 
                     ),
-
 
 
                   ],
@@ -81,4 +118,5 @@ class FormPage extends StatelessWidget {
 
     );
   }
+
 }
